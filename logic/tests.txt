@@ -1,0 +1,41 @@
+Input formula: A->B
+Prepared formula: A>B
+Symbols: {'B', 'A'}
+NOT tautology
+Crashes on: {'B': 0, 'A': 1}
+
+Input formula: 	a ->           b    
+Prepared formula: A>B
+Symbols: {'B', 'A'}
+NOT tautology
+Crashes on: {'B': 0, 'A': 1}
+
+Input formula: (A->B)->!(!A->!B)
+Prepared formula: (A>B)>!(!A>!B)
+Symbols: {'B', 'A'}
+NOT tautology
+Crashes on: {'B': 0, 'A': 0}
+
+Input formula: !A->!B
+Prepared formula: !A>!B
+Symbols: {'B', 'A'}
+NOT tautology
+Crashes on: {'B': 1, 'A': 0}
+
+Input formula: !(A->!B)
+Prepared formula: !(A>!B)
+Symbols: {'B', 'A'}
+NOT tautology
+Crashes on: {'B': 0, 'A': 0}
+
+Input formula: !A->(A->A)
+Prepared formula: !A>(A>A)
+Symbols: {'A'}
+Tautology
+
+Input formula: !A->!(!B->(!C->A))
+Prepared formula: !A>!(!B>(!C>A))
+Symbols: {'B', 'A', 'C'}
+NOT tautology
+Crashes on: {'B': 1, 'A': 0, 'C': 0}
+
