@@ -1,32 +1,32 @@
 Input formula: A->B
 Prepared formula: A>B
-Symbols: {'B', 'A'}
+Symbols: {'A', 'B'}
 NOT tautology
-Crashes on: {'B': 0, 'A': 1}
+Crashes on: {'A': 1, 'B': 0}
 
 Input formula: 	a ->           b    
 Prepared formula: A>B
-Symbols: {'B', 'A'}
+Symbols: {'A', 'B'}
 NOT tautology
-Crashes on: {'B': 0, 'A': 1}
+Crashes on: {'A': 1, 'B': 0}
 
 Input formula: (A->B)->!(!A->!B)
 Prepared formula: (A>B)>!(!A>!B)
-Symbols: {'B', 'A'}
+Symbols: {'A', 'B'}
 NOT tautology
-Crashes on: {'B': 0, 'A': 0}
+Crashes on: {'A': 0, 'B': 0}
 
 Input formula: !A->!B
 Prepared formula: !A>!B
-Symbols: {'B', 'A'}
+Symbols: {'A', 'B'}
 NOT tautology
-Crashes on: {'B': 1, 'A': 0}
+Crashes on: {'A': 0, 'B': 1}
 
 Input formula: !(A->!B)
 Prepared formula: !(A>!B)
-Symbols: {'B', 'A'}
+Symbols: {'A', 'B'}
 NOT tautology
-Crashes on: {'B': 0, 'A': 0}
+Crashes on: {'A': 0, 'B': 0}
 
 Input formula: !A->(A->A)
 Prepared formula: !A>(A>A)
@@ -35,7 +35,24 @@ Tautology
 
 Input formula: !A->!(!B->(!C->A))
 Prepared formula: !A>!(!B>(!C>A))
-Symbols: {'B', 'A', 'C'}
+Symbols: {'C', 'A', 'B'}
 NOT tautology
-Crashes on: {'B': 1, 'A': 0, 'C': 0}
+Crashes on: {'C': 1, 'A': 0, 'B': 0}
+
+Input formula: (a->(b->(c->!a)))->a
+Prepared formula: (A>(B>(C>!A)))>A
+Symbols: {'C', 'A', 'B'}
+NOT tautology
+Crashes on: {'C': 0, 'A': 0, 'B': 0}
+
+Input formula: (!a->(b->(c->!a)))->a
+Prepared formula: (!A>(B>(C>!A)))>A
+Symbols: {'C', 'A', 'B'}
+NOT tautology
+Crashes on: {'C': 0, 'A': 0, 'B': 0}
+
+Input formula: !(a->(b->(c->!a)))->a
+Prepared formula: !(A>(B>(C>!A)))>A
+Symbols: {'C', 'A', 'B'}
+Tautology
 

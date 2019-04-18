@@ -140,7 +140,7 @@ def buildFormula(s):
         """
         s.pop(0)
         node = buildFormula(s)
-        if len(s) != 0 and s[0] == ')': s.pop(0)
+        #if len(s) != 0 and s[0] == ')': s.pop(0)
     else:
         symbol = s.pop(0)
 
@@ -176,10 +176,11 @@ def prepareString(s:str):
 
 def bruteforce(tree, symbols):
     index = 0
-    for i in range(2**(len(symbols)+1)):
+    for i in range(2**len(symbols)):
         values = {
             symbols[k] : 0 if (index & (1<<k))==0 else 1 for k in range(len(symbols))
         }
+
         c = tree.calculate(values)
 
         if c == 0:
@@ -200,7 +201,10 @@ def test():
         "!A->!B",
         "!(A->!B)",
         "!A->(A->A)",
-        "!A->!(!B->(!C->A))"
+        "!A->!(!B->(!C->A))",
+        "(a->(b->(c->!a)))->a",
+        "(!a->(b->(c->!a)))->a",
+        "!(a->(b->(c->!a)))->a"
     ]
 
     for t in tests:
@@ -240,7 +244,7 @@ def userInput():
 
     tree = buildFormula(s)
 
-    print('Symbols:',symbols)
+    #print('Symbols:',symbols)
 
     ifTau, res = bruteforce(tree, list(symbols))
     if ifTau:
@@ -250,4 +254,5 @@ def userInput():
         print('Crashes on:',res)
 
 if __name__ == '__main__':
+    #userInput()
     test()
