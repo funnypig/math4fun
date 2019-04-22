@@ -1,24 +1,9 @@
 
-"""
-    The goal of this module is to:
-        - check if formula of propositional calculus is tautology
-        - build formal illation of the given formula
 
-    Variable symbols: capital english letters (A-Z)
+class IncorrectInput(Exception):
+    def __str__(self):
+        return 'Incorrect formula'
 
-    Operations:
-        - '!' logical not
-        - '->' implication
-
-    Technical symbols: '(', ')'
-
-    Author: Antipiev Illya,
-
-            Faculty of Mechanics and Mathematics,
-            Taras Shevchenko National university of Kyiv
-
-            ilya.antipiev@gmail.com
-"""
 
 VARS = [chr(i) for i in range(ord('A'), ord('Z')+1)] # variable symbols
 
@@ -58,56 +43,101 @@ def lnot(a):
 
     return 0 if a == 1 else 1
 
-class Node:
+class Variable:
     """
-        Represents the variable symbol of the node.
-        If the node is formula, I replace it with variable and represent as Node.
-
-        F.e.
-        Let F = A -> (B -> !C)
-
-        F is node.
-        A is node.
-        B is node.
-        !C is node.
-
-        Let's calculate (B -> !C), then replace it with D = (B -> !C), now we can set D as Node.
+        Represents single variable or it's negative value -
+            the letter from A to Z, or !A, ... ,!Z
     """
-    def __init__(self, symbol = None, _not = False, operation = None, this = None, next = None):
+    def __init__(self, symbol, _not = False, msg = ""):
         self.symbol = symbol
         self._not = _not
-        self.operation = operation
-        self.this = this
-        self.next = next
+        self.msg = msg
 
     def calculate(self, values):
-        a = values[self.symbol] if not self.symbol is None else self.this.calculate(values)
-
-        if self._not:
-            a = lnot(a)
-
-        if self.operation is None:
-            return a
-        else:
-            return self.operation(a, self.next.calculate(values))
+        return lnot(values[self.symbol]) if self._not else values[self.symbol]
 
     def show(self):
+        if self._not:
+            print('!',end='')
+        print(self.symbol, end='')
 
-        print(('!' if self._not else ''), end='')
+    def __str__(self):
+        res = ''
 
-        if not self.symbol is None:
-            print(self.symbol, end='')
+        if self._not:
+            res = '!'
 
-        if not self.this is None:
-            print('(',end='')
-            self.this.show()
-            print(')',end='')
+        res += self.symbol
 
-        if not self.next is None:
-            print('->',end='')
-            if not self.next is None:
-                self.next.show()
+        return res
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def used_symbols(self):
+        return {self.symbol}
+
+class Node:
+    """
+        Represents formula:
+            - Variable -> Variable
+            - Variable -> Node
+            - Node -> Variable
+            - Node -> Node
+
+        if left or right is single symbol it will be represented as Variable
+        if there is combination of variables in parentheses it will be Node
+
+        f.e. A->!(B->C)     =>  Variable -> Node
+             (B->C)->A      =>  Node -> Variable
+
+        Both Variable and Node has 'calculate' function,
+        so it is not problem to calculate child of the tree in spite of its type
+    """
+
+    def __init__(self, left, right, _not = False, msg = ''):
+        self.left = left
+        self.right = right
+        self._not = _not
+        self.msg = msg
+
+    def calculate(self, values):
+        res = implication(self.left.calculate(values), self.right.calculate(values))
+        if self._not:
+            res = lnot(res)
+
+        return res
+
+    def show(self):
+        if self._not:
+            print('!',end='')
+        print('(', end='')
+        self.left.show()
+        print('->', end='')
+        self.right.show()
+        print(')', end='')
+
+    def __str__(self):
+        res = ''
+
+        if self._not:
+            res = '!'
+        res = res + '(' + str(self.left) + ') -> (' + str(self.right) + ')'
+
+        return res
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def used_symbols(self):
+        s = str(self)
+        _symbols = set()
+
+        for si in s:
+            if si in VARS:
+                _symbols.add(si)
+
+        return _symbols
 
 def buildFormula(s):
     """
@@ -117,45 +147,68 @@ def buildFormula(s):
     :return: Node
     """
 
-    if s is None or len(s) == 0:
-        return None
-    if s[0] == ')':
-        s.pop(0)
-        return None
+    def get_node():
 
-    node = None
-    symbol = ''
-    _not = False
-    operation = None
+        nonlocal s
 
-    if s[0] == '!':
-        _not = True
-        s.pop(0)
+        _not = False
+        if s[0] == '!':
+            _not = True
+            s.pop(0)
 
-    if s[0] == '(':
-        """
-            ( ... ) ... => ... ) ...
-            make formula with ...
-            => ) ... => ...
-        """
+        node = None
+
+        if s[0] in VARS:
+            symbol = s.pop(0)
+            node = Variable(symbol, _not)
+            return node
+        elif s[0] == '(':
+            s.pop(0)
+            left = get_node()
+            right = None
+
+            if s[0]==')':
+                s.pop(0)
+                return left
+            elif s[0] == '>':
+                s.pop(0)
+                right = get_node()
+            s.pop(0)
+
+            if right is None:
+                return left
+            else:
+                node = Node(left, right, _not)
+                return node
+        else:
+            raise IncorrectInput()
+
+
+    """
+        left -> right
+    """
+    left = get_node()
+
+    """
+        (left) or left
+            is possible too
+    """
+    if len(s) == 0:
+        return left
+
+    """
+        but implication is required if formula continues
+    """
+    if s[0] == '>':
         s.pop(0)
-        node = buildFormula(s)
-        #if len(s) != 0 and s[0] == ')': s.pop(0)
     else:
-        symbol = s.pop(0)
+        raise IncorrectInput()
 
-    # pop operation
-    if len(s)!=0 and s[0] == '>':
-        operation = implication
-        s.pop(0)
+    right = get_node()
 
-    nextNode = buildFormula(s)
+    return Node(left, right)
 
-    if node is None:
-        node = Node(symbol=symbol, _not = _not, operation = operation, next = nextNode)
-    else:
-        node = Node(this = node, _not = _not, operation = operation, next = nextNode)
-    return node
+
 
 def prepareString(s:str):
     """
@@ -173,86 +226,3 @@ def prepareString(s:str):
 
     return s
 
-
-def bruteforce(tree, symbols):
-    index = 0
-    for i in range(2**len(symbols)):
-        values = {
-            symbols[k] : 0 if (index & (1<<k))==0 else 1 for k in range(len(symbols))
-        }
-
-        c = tree.calculate(values)
-
-        if c == 0:
-            return False, values
-
-        index+=1
-
-    return True, None
-
-def analyze(tree):
-    # TODO
-    pass
-
-def test():
-    tests = [
-        "A->B", "\ta ->           b    ",
-        "(A->B)->!(!A->!B)",
-        "!A->!B",
-        "!(A->!B)",
-        "!A->(A->A)",
-        "!A->!(!B->(!C->A))",
-        "(a->(b->(c->!a)))->a",
-        "(!a->(b->(c->!a)))->a",
-        "!(a->(b->(c->!a)))->a"
-    ]
-
-    for t in tests:
-        print("Input formula:",t)
-        s = prepareString(t)
-        print("Prepared formula:", s)
-
-        symbols = set()
-        for _s in s:
-            if _s in VARS:
-                symbols.add(_s)
-
-        s = list(s)
-        tree = buildFormula(s)
-
-        print('Symbols:', symbols)
-
-        ifTau, res = bruteforce(tree, list(symbols))
-        if ifTau:
-            print('Tautology')
-        else:
-            print('NOT tautology')
-            print('Crashes on:', res)
-
-        print()
-
-def userInput():
-    print('Input formula:')
-    s = input()
-    s = prepareString(s)
-    s =  list(s)
-
-    symbols = set()
-    for _s in s:
-        if _s in VARS:
-            symbols.add(_s)
-
-    tree = buildFormula(s)
-
-    #print('Symbols:',symbols)
-
-    ifTau, res = bruteforce(tree, list(symbols))
-    if ifTau:
-        print('Tautology')
-    else:
-        print('NOT tautology')
-        print('Crashes on:',res)
-
-if __name__ == '__main__':
-    #userInput()
-    test()
