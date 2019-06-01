@@ -22,7 +22,7 @@
 
 
 from formula import *
-from formal_maker import formal_output
+import theorem_maker
 
 print('Enter formula:')
 
@@ -32,4 +32,12 @@ s = list(s)
 tree = buildFormula(s)
 
 print()
-formal_output(tree)
+
+proof = theorem_maker.Ad_Theorem(tree)
+
+file = open('Proof_'+tree+'.txt','w',encoding='utf-8')
+
+for p in proof:
+    file.write(p+'\n'+p.msg+'\n\n')
+
+file.close()

@@ -77,6 +77,18 @@ class Variable:
     def used_symbols(self):
         return {self.symbol}
 
+
+"""
+    IMPORTANT CLAIM:
+        'single' parameter introduced below to allow use double not to formula
+        f.e. it was unable to use !!(A->B) earlier
+        now it will be 
+            Node0: _not = true, single = Node1
+            Node1: _not = true, single = Node
+            Node: left = A, right = B
+
+"""
+
 class Node:
     """
         Represents formula:
@@ -95,13 +107,28 @@ class Node:
         so it is not problem to calculate child of the tree in spite of its type
     """
 
-    def __init__(self, left, right, _not = False, msg = ''):
+    def __init__(self, left, right, _not = False, msg = '', single = None):
+
+        if not single is None:
+            self.single = single
+            self.msg = msg
+            self._not = _not
+            self.msg = msg
+            return
+
         self.left = left
         self.right = right
         self._not = _not
         self.msg = msg
 
+        self.single = None
+
     def calculate(self, values):
+
+        if not self.single is None:
+            res = self.single.calculate(values)
+            return lnot(res) if self._not else res
+
         res = implication(self.left.calculate(values), self.right.calculate(values))
         if self._not:
             res = lnot(res)
@@ -118,6 +145,15 @@ class Node:
         print(')', end='')
 
     def __str__(self):
+
+        if not self.single is None:
+            if self._not:
+                res = '!('+str(self.single)+')'
+            else:
+                res = str(self.single)
+
+            return res
+
         res = ''
 
         if self._not:
@@ -139,6 +175,10 @@ class Node:
 
         return _symbols
 
+def notFormula(tree):
+    nt = Node(None, None, _not=True, single=tree)
+    return nt
+
 def buildFormula(s):
     """
     build the sequence of nodes
@@ -146,6 +186,10 @@ def buildFormula(s):
     f.e. A->!B  =>  [A, ->, !B]
     :return: Node
     """
+
+
+    if type(s) == str:
+        s = list(s)
 
     def get_node():
 
@@ -226,3 +270,28 @@ def prepareString(s:str):
 
     return s
 
+if __name__ == '__main__':
+    f = buildFormula(prepareString('!A->(B->A)'))
+
+
+    f0 = buildFormula(prepareString('A->B'))
+    f1 = notFormula(f0)
+    f2 = notFormula(f1)
+
+
+
+    F = buildFormula(prepareString("((A->B)->A)->A"))
+
+    print(f0, 'Calc:',f0.calculate({'A':1, 'B':0}))
+    print(f1, 'Calc:',f1.calculate({'A':1, 'B':0}))
+    print(f2, 'Calc:',f2.calculate({'A':1, 'B':0}))
+    print(F)
+    print()
+
+    a = Variable('A')
+    na = notFormula(a)
+    nna = notFormula(na)
+
+    print(a, 'Calc:',a.calculate({'A':1}))
+    print(na, 'Calc:',na.calculate({'A':1}))
+    print(nna, 'Calc:',nna.calculate({'A':1}))
