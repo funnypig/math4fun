@@ -113,9 +113,9 @@ def build_T7(F,G):
         Node(F, G),
         Node(Node(nF, G),G)
     )
-    t7.msg = "T7 for F, G. not implemented"
+    t7.msg = "T7 for F, G. proof not implemented"
 
-    return t7
+    return [t7]
 
 def build_T1(F):
     nF = notFormula(F)
@@ -164,8 +164,80 @@ def build_T2(F):
 
     return res
 
-def build_T3(F):
-    return []
+def build_T3(F, G):
+    # !f -> (f->G)
+    F1 = notFormula(F)
+    F2 = F
+
+    F3 = axiom.A1(F2, F1)
+    F4 = MP(F2, F3)
+
+    F5 = axiom.A1(F1, notFormula(G))
+    F6 = MP(F1, F3)
+    F7 = axiom.A3(F,G)
+    F8 = MP(F6, F7)
+    F9 = MP(F4, F8)
+
+    hypoth = [F1, F2, F3, F4, F5, F6, F7, F8, F9]
+
+    ded1 = build_deduction(hypoth, F, G)
+    ded2 = build_deduction(hypoth+ded1, F1, ded1[-1])
+
+    proof = [F3, F4, F5, F6, F7, F8, F9]
+    proof.extend(ded1)
+    proof.extend(ded2)
+
+    return proof
+
+
+def build_T4(F, G):
+    # (!G->!F)->(F->G)
+
+    nF = notFormula(F)
+    nG = notFormula(G)
+
+    F1 = Node(nG, nF)
+    F2 = F
+
+    F3 = axiom.A3(F, G)
+    F4 = MP(F1, F3)
+    F5 = axiom.A1(F, nG)
+
+    f6 = syl_1(F5, F4)
+    F6 = f6[-1]
+    F7 = MP(F2, F6)
+
+    proof = [F1, F2, F3, F4, F5]
+    proof.extend(f6)
+    proof.append(F7)
+
+    ded1 = build_deduction(proof, F2, G)
+    ded2 = build_deduction(proof+ded1, F1, F6)
+
+    proof.extend(ded1)
+    proof.extend(ded2)
+
+    return proof
+
+def build_T5(F,G):
+    nF = notFormula(F)
+    nG = notFormula(G)
+
+    t5 = Node(Node(F, G),Node(nG, nF))
+    t5.msg = "T5 for F, G. proof not implemented"
+
+    return [t5]
+
+def build_T6(F, G):
+    nG = notFormula(G)
+    fg = Node(F, G, _not=True)
+
+    t6 = Node(F,
+              Node(nG, fg))
+
+    t6.msg = "T6 for F,G. proof not implemented"
+
+    return [t6]
 
 def Calmar_Theorem(F:Node, values):
     '''
@@ -192,7 +264,15 @@ def Calmar_Theorem(F:Node, values):
             return [G]
 
         else:
-            pass
+            # !f = !!g
+            t2 = build_T2(G)
+            T2 = t2[-1]
+
+            nng = MP(G, T2)
+
+            res = t2
+            res.append(nng)
+            return res
 
     else:   # F = G->H
 
@@ -202,7 +282,7 @@ def Calmar_Theorem(F:Node, values):
         H = F.right
 
         if G.calculate(values) == 0:
-            G.msg = "Calmar th. 2.a hypothesis"
+
             t3 = build_T3(G, H)
 
             T = t3[-1]
@@ -210,10 +290,33 @@ def Calmar_Theorem(F:Node, values):
 
             res = t3
             res.append(mp)
-        elif 1:
-            pass
+
+        elif H.calculate(values) == 1:
+
+            # h->(g->h)
+            h = H
+            hgh = axiom.A1(H,G)
+
+            gh = MP(h, hgh)
+
+            return [hgh, gh]
+
         else:
-            pass
+            # F = !(G->H)
+            # have G, !H. proof !(G->H)
+
+            nH = notFormula(H)
+
+            t6 = build_T6(G, H)
+            T6 = t6[-1]
+
+            f1 = MP(G, T6)
+            f2 = MP(nH, f1)
+
+            res = t6
+            res.extend([f1, f2])
+
+        return res
 
 def Ad_Theorem(F):
     '''
@@ -226,18 +329,19 @@ def Ad_Theorem(F):
 
     proof = []
 
-    symbols = F.used_symbols()
+    symbols = list(F.used_symbols())
     symbolsCount = len(symbols)
 
     N = 1<<symbolsCount
 
     vector = 0 # why not int for vector?
+    n = 0
 
-
-    while len(symbols)!=0:
+    while n<len(symbols):
+        vector = 0
         while vector<N:
-            X_n = symbols.pop()
-            values = {symbols[k]: 0 if vector&(1<<k) == 0 else 1 for k in range(symbolsCount)}
+            X_n = symbols[n]
+            values = {symbols[k]: 0 if vector&(1<<k) == 0 else 1 for k in range(len(symbols))}
             values_not = values.copy()
 
             values[X_n] = 1
@@ -248,10 +352,18 @@ def Ad_Theorem(F):
             proof.extend(C1)
             proof.extend(C2)
 
-            Vars = [Variable(s, _not=values[s]) for s in symbols]
+            deduct = build_deduction(proof, Variable(X_n), F)
+            if not deduct is None:
+                proof.extend(deduct)
 
-            proof.extend(build_deduction(proof, Variable(X_n), F))
-            proof.extend(build_deduction(proof, Variable(X_n, _not=True), F))
+            deduct = build_deduction(proof, Variable(X_n, _not=True), F)
+
+            if not deduct is None:
+                proof.extend(deduct)
+
+            if len(C1) == 0 or len(C2) == 0:
+                vector+=1
+                continue
 
             t7 = axiom.T7(Variable(X_n), F)
             mp1 = MP(C1[-1], t7)
@@ -260,25 +372,26 @@ def Ad_Theorem(F):
             proof.extend([t7, mp1, mp2])
 
             vector+=1
+        n+=1
+
+    return proof
 
 if __name__ == '__main__': # some tests
 
     a = Variable('A')
-    f = Node(a, a)
-    for r in build_deduction(a, a, a):
-        print(r, '\t', r.msg)
+    nA = notFormula(a)
+    nna = notFormula(nA)
 
-    exit()
+    F = Node(a, nna)
 
-    h = [Variable('A'), Variable('B'), Variable('C')]
-    vc = Variable('G')
-    vg = Variable('G')
+    proof = Ad_Theorem(F)
 
-    deduction = build_deduction(h, vc, vg)
-    print(len(deduction))
+    index = 0
+    for p in proof:
+        if p is None:
+            continue
+        print(str(index) + '.\t' + str(p) + '\n' + p.msg + '\n\n')
+        index+=1
 
-    for r in deduction:
-        if r is None:
-            print(r)
-        else:
-            print(r,'\t',r.msg)
+        if p == F:
+            break

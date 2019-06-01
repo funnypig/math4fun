@@ -4,6 +4,7 @@ class IncorrectInput(Exception):
     def __str__(self):
         return 'Incorrect formula'
 
+GLOBAL_ID = 0
 
 VARS = [chr(i) for i in range(ord('A'), ord('Z')+1)] # variable symbols
 
@@ -49,6 +50,10 @@ class Variable:
             the letter from A to Z, or !A, ... ,!Z
     """
     def __init__(self, symbol, _not = False, msg = ""):
+        global GLOBAL_ID
+        self.id = GLOBAL_ID
+        GLOBAL_ID+=1
+
         self.symbol = symbol
         self._not = _not
         self.msg = msg
@@ -108,6 +113,9 @@ class Node:
     """
 
     def __init__(self, left, right, _not = False, msg = '', single = None):
+        global GLOBAL_ID
+        self.id = GLOBAL_ID
+        GLOBAL_ID += 1
 
         if not single is None:
             self.single = single
@@ -176,7 +184,7 @@ class Node:
         return _symbols
 
 def notFormula(tree):
-    nt = Node(None, None, _not=True, single=tree)
+    nt = Node(None, None, _not=True, msg="NOT added to: "+tree.msg, single=tree)
     return nt
 
 def buildFormula(s):
