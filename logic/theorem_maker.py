@@ -220,13 +220,48 @@ def build_T4(F, G):
     return proof
 
 def build_T5(F,G):
+    """
+        (F->G)->(!G->!F)
+    """
+
     nF = notFormula(F)
     nG = notFormula(G)
 
-    t5 = Node(Node(F, G),Node(nG, nF))
-    t5.msg = "T5 for F, G. proof not implemented"
+    nnF = notFormula(nF)
+    nnG = notFormula(nG)
 
-    return [t5]
+    F1 = Node(F,G)
+    F2 = nG
+
+    F3 = axiom.A3(nnG, nnF) # (!!F->!!G)->((!!F->!G)->!F)
+    F4 = axiom.A1(nG, nnF) # !G->(!!F->!G) => MP: !!F->!G
+    F45 = MP(nG, F4)
+
+    f5 = build_T2(G)
+    F5 = f5[-1]
+    f6 = build_T1(F)
+    F6 = f6[-1]
+
+    f7 = syl_1(F1, F5)
+    F7 = f7[-1]
+
+    f8 = syl_1(F6, F7)
+    F8 = f8[-1]
+
+    F9 = MP(F8, F3)
+    F10 = MP(F45, F9)
+
+    proof = [F1, F2, F3, F4, F45]
+    proof.extend(f5)
+    proof.extend(f6)
+    proof.extend(f7)
+    proof.extend(f8)
+    proof.extend([F9, F10])
+
+    proof.extend(build_deduction(proof[:-2], F2, F10))
+    proof.extend(build_deduction(proof[:-2], F1, proof[-1]))
+
+    return proof
 
 def build_T6(F, G):
     nG = notFormula(G)
@@ -239,7 +274,7 @@ def build_T6(F, G):
 
     return [t6]
 
-def Calmar_Theorem(F:Node, values):
+def Calmar_Theorem(F, values):
     '''
         Calmar's Theorem implementation
 
@@ -248,8 +283,7 @@ def Calmar_Theorem(F:Node, values):
     '''
 
     if type(F) == Variable:
-        v = Variable(F.symbol, F._not)
-        v.msg = "Calmar's theorem, induction base"
+        v = Variable(F.symbol, _not=True if values[F.symbol] == 1 else 0)
 
         return [v]
 
@@ -365,11 +399,13 @@ def Ad_Theorem(F):
                 vector+=1
                 continue
 
-            t7 = axiom.T7(Variable(X_n), F)
-            mp1 = MP(C1[-1], t7)
+            t7 = build_T7(Variable(X_n), F)
+            T7 = t7[-1]
+            mp1 = MP(C1[-1], T7)
             mp2 = MP(C2[-1], mp1)
 
-            proof.extend([t7, mp1, mp2])
+            proof.extend(t7)
+            proof.extend([mp1, mp2])
 
             vector+=1
         n+=1

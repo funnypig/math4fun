@@ -43,10 +43,11 @@ while None in proof:
 
 proof.sort(key=lambda F: F.id)
 
+file.write("Proof for: "+str(tree)+'\n\n')
+
 index = 0
 for p in proof:
-    if p is None:
-        continue
+
     file.write(str(index)+'.\t'+str(p)+'\n'+p.msg+'\n\n')
 
     index+=1
