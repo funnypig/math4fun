@@ -44,9 +44,9 @@ def build_deduction(hypoth, F, G):
     elif axiom.if_Axiom(F) or F in hypoth:
 
         # A1 for F, G
-        F1 = axiom.A1(F, G)
+        F1 = axiom.A1(G,F)
         # MP for F and F1
-        F2 = axiom.MP(F, F1)
+        F2 = axiom.MP(G, F1)
 
         res = [F1, F2]
 
@@ -90,16 +90,20 @@ def syl_1(F, G):
     F5 = MP(F4, G)
 
     res = [F, G, F1, F4]
-    res.extend(build_deduction(res, F1, Node(F1, F5)))
+    res.extend(build_deduction(res, F1, F5))
+
+    return res
 
 def syl_2(F, G):
-    # A->(B->C), B |- A->C
+    # F->(G->H), G |- F->H
+
+
 
     F3 = F.left # A
-    F4 = MP(F, F3) # B->C
+    F4 = MP(F3, F) # B->C
     F5 = MP(G, F4) # C
 
-    f = build_deduction(F3, F5) # A->C
+    f = build_deduction([F, F3, F4], F3, F5) # A->C
 
     res = [F3, F4, F5]
     res.extend(f)
@@ -149,7 +153,7 @@ def build_T2(F):
 
     F1 = axiom.A3(F, nnF) # (!!!F->!F)->((!!F->F)->!!F)
 
-    f2 = build_T1(F) # build th. 1
+    f2 = build_T1(nF) # build th. 1
     F2 = f2[-1] # !!!A->!A
 
     F3 = MP(F2, F1) # ...->!!A
@@ -166,14 +170,16 @@ def build_T2(F):
 
 def build_T3(F, G):
     # !f -> (f->G)
+    nG = notFormula(G)
+
     F1 = notFormula(F)
     F2 = F
 
-    F3 = axiom.A1(F2, F1)
+    F3 = axiom.A1(F2, nG)
     F4 = MP(F2, F3)
 
-    F5 = axiom.A1(F1, notFormula(G))
-    F6 = MP(F1, F3)
+    F5 = axiom.A1(F1, nG)
+    F6 = MP(F1, F5)
     F7 = axiom.A3(F,G)
     F8 = MP(F6, F7)
     F9 = MP(F4, F8)
@@ -183,9 +189,11 @@ def build_T3(F, G):
     ded1 = build_deduction(hypoth, F, G)
     ded2 = build_deduction(hypoth+ded1, F1, ded1[-1])
 
-    proof = [F3, F4, F5, F6, F7, F8, F9]
+    proof = [F3, F4, F5, F6, F7]
     proof.extend(ded1)
     proof.extend(ded2)
+
+    proof.extend([F8, F9])
 
     return proof
 
@@ -209,13 +217,14 @@ def build_T4(F, G):
 
     proof = [F1, F2, F3, F4, F5]
     proof.extend(f6)
-    proof.append(F7)
 
     ded1 = build_deduction(proof, F2, G)
     ded2 = build_deduction(proof+ded1, F1, F6)
 
     proof.extend(ded1)
     proof.extend(ded2)
+
+    proof.append(F7)
 
     return proof
 
@@ -233,7 +242,7 @@ def build_T5(F,G):
     F1 = Node(F,G)
     F2 = nG
 
-    F3 = axiom.A3(nnG, nnF) # (!!F->!!G)->((!!F->!G)->!F)
+    F3 = axiom.A3(nG, nF) # (!!F->!!G)->((!!F->!G)->!F)
     F4 = axiom.A1(nG, nnF) # !G->(!!F->!G) => MP: !!F->!G
     F45 = MP(nG, F4)
 
@@ -256,23 +265,41 @@ def build_T5(F,G):
     proof.extend(f6)
     proof.extend(f7)
     proof.extend(f8)
-    proof.extend([F9, F10])
 
     proof.extend(build_deduction(proof[:-2], F2, F10))
     proof.extend(build_deduction(proof[:-2], F1, proof[-1]))
 
+    proof.extend([F9, F10])
+
     return proof
 
 def build_T6(F, G):
-    nG = notFormula(G)
-    fg = Node(F, G, _not=True)
+    fg = Node(F,G)
+    fg.msg = "hypoth t6"
 
-    t6 = Node(F,
-              Node(nG, fg))
+    t5 = build_T5(fg, G)
+    T5 = t5[-1]
 
-    t6.msg = "T6 for F,G. proof not implemented"
 
-    return [t6]
+    ng = notFormula(G)
+    ng.msg = "hypoth t6"
+    F1 = F
+    F1.msg = "hypoth t6"
+    # we need (F->G)->G
+    F2 = MP(F1, fg)
+    ded = build_deduction([F,fg], fg, G)
+    F3 = ded[-1]
+
+    F4 = MP(F3, T5)
+    F5 = MP(ng, F4)
+
+    proof = [fg, ng, F1]
+    proof.extend(t5)
+    proof.append(F2)
+    proof.extend(ded)
+    proof.extend([F4,F5])
+
+    return proof
 
 def Calmar_Theorem(F, values):
     '''
@@ -317,10 +344,11 @@ def Calmar_Theorem(F, values):
 
         if G.calculate(values) == 0:
 
+            nG = notFormula(G)
             t3 = build_T3(G, H)
 
             T = t3[-1]
-            mp = MP(G, T)
+            mp = MP(nG, T)
 
             res = t3
             res.append(mp)
@@ -386,6 +414,10 @@ def Ad_Theorem(F):
             proof.extend(C1)
             proof.extend(C2)
 
+            # clean
+            while None in proof:
+                proof.remove(None)
+
             deduct = build_deduction(proof, Variable(X_n), F)
             if not deduct is None:
                 proof.extend(deduct)
@@ -408,7 +440,22 @@ def Ad_Theorem(F):
             proof.extend([mp1, mp2])
 
             vector+=1
+
+
         n+=1
+
+
+    # clean doubles
+
+    i1 = 0
+    while i1<len(proof):
+        i2 = i1+1
+        while i2<len(proof):
+            if proof[i2] == proof[i1]:
+                proof.pop(i2)
+            else:
+                i2+=1
+        i1+=1
 
     return proof
 

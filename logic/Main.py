@@ -41,7 +41,6 @@ file = open('Proof_'+str(tree)+'.txt','w',encoding='utf-8')
 while None in proof:
     proof.remove(None)
 
-proof.sort(key=lambda F: F.id)
 
 file.write("Proof for: "+str(tree)+'\n\n')
 

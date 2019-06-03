@@ -206,7 +206,13 @@ def buildFormula(s):
         _not = False
         if s[0] == '!':
             _not = True
+
             s.pop(0)
+
+            node = get_node()
+            node = notFormula(node)
+
+            return node
 
         node = None
 
@@ -279,6 +285,19 @@ def prepareString(s:str):
     return s
 
 if __name__ == '__main__':
+
+
+    s = "!!F->F"
+    s = "F->!!F"
+    s = prepareString(s)
+    f = buildFormula(s)
+
+    print(f)
+    print(f.calculate({"F":1}))
+    print(f.calculate({"F":0}))
+
+    exit()
+
     f = buildFormula(prepareString('!A->(B->A)'))
 
 
