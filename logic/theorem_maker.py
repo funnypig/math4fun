@@ -445,10 +445,13 @@ def Ad_Theorem(F):
                 vector+=1
                 continue
 
+            ld1 = deductC1[-1]
+            ld2 = deductC2[-1]
+
             t7 = build_T7(Variable(X_n), F)
             T7 = t7[-1]
-            mp1 = MP(C1[-1], T7)
-            mp2 = MP(C2[-1], mp1)
+            mp1 = MP(ld1, T7)
+            mp2 = MP(ld2, mp1)
 
             proof.extend(deductC1)
             proof.extend(deductC2)
@@ -467,10 +470,13 @@ def Ad_Theorem(F):
 
 if __name__ == '__main__':
 
-
-
     f = Variable('F')
     g = Variable('G')
+
+    nf = notFormula(f)
+    nnf = notFormula(nf)
+    Ad_Theorem(Node(nnf, f))
+
 
     t4 = build_T4(f,g)
     T4 = t4[-1]

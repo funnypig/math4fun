@@ -63,16 +63,17 @@ class Variable:
 
     def show(self):
         if self._not:
-            print('!',end='')
-        print(self.symbol, end='')
+            print('!({})'.format(self.symbol),end='')
+        else:
+            print(self.symbol, end='')
 
     def __str__(self):
         res = ''
 
         if self._not:
-            res = '!'
-
-        res += self.symbol
+            res = '!({})'.format(self.symbol)
+        else:
+            res = self.symbol
 
         return res
 

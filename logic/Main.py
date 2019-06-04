@@ -56,3 +56,6 @@ for p in proof[-10:]:
         print(p.msg)
 
     print()
+
+print(proof.count(None))
+print(tree in proof)
