@@ -3,6 +3,8 @@ import axiom
 from axiom import MP
 from formula import Variable, Node, notFormula
 
+proof = []  # global is not best solution, but as it is
+
 def build_TL(F):
     """
         Make L theorem with F
@@ -111,15 +113,55 @@ def syl_2(F, G):
     return res
 
 def build_T7(F,G):
+    # (F->G)->((!F->G)->G)
+
     nF = notFormula(F)
+    nG = notFormula(G)
 
-    t7 = Node(
-        Node(F, G),
-        Node(Node(nF, G),G)
-    )
-    t7.msg = "T7 for F, G. proof not implemented"
+    F1 = Node(F,G)
+    F1.msg = "t7 hypoth"
+    F2 = Node(nF, G)
+    F2.msg = "t7 hypoth"
 
-    return [t7]
+    f3 = build_T5(F,G)
+    F3 = f3[-1]
+    F4 = axiom.A3(F,G)
+
+    f5 = syl_1(F3, F4)
+    F5 = f5[-1]
+
+    F6 = MP(F1, F5)
+
+    f7 = build_T4(nG, F)
+    F7 = f7[-1]
+
+    # (!F->G)->(!F->!!G)
+    F8 = nF
+    F9 = Node(nF, G)
+    F10 = MP(F8, F9)
+    f11 = build_T2(G)
+    F11 = f11[-1]
+
+    F12 = MP(F10, F11)
+
+    proof = [F1, F2] + f3 + [F4] + f5 + [F6] + f7 + [F8, F9, F10] + f11 + [F12]
+
+    f13 = build_deduction(proof, F8, F12)
+    F13 = f13[-1]
+    f14 = build_deduction(proof, F9, F13)
+    F14 = f14[-1]
+
+    #...
+    f15 = syl_1(F14, F7)
+    F15 = f15[-1]
+    f16 = syl_1(F15, F6)
+    F16 = f16[-1]
+
+    f17 = build_deduction(proof, F1, F16)
+
+    proof += f13 + f14 + f15 + f16 + f17
+
+    return proof
 
 def build_T1(F):
     nF = notFormula(F)
@@ -221,10 +263,10 @@ def build_T4(F, G):
     ded1 = build_deduction(proof, F2, G)
     ded2 = build_deduction(proof+ded1, F1, F6)
 
-    proof.extend(ded1)
-    proof.extend(ded2)
 
     proof.append(F7)
+    proof.extend(ded1)
+    proof.extend(ded2)
 
     return proof
 
@@ -266,10 +308,10 @@ def build_T5(F,G):
     proof.extend(f7)
     proof.extend(f8)
 
+    proof.extend([F9, F10])
     proof.extend(build_deduction(proof[:-2], F2, F10))
     proof.extend(build_deduction(proof[:-2], F1, proof[-1]))
 
-    proof.extend([F9, F10])
 
     return proof
 
@@ -389,7 +431,7 @@ def Ad_Theorem(F):
     :return: formal proof |- F
     '''
 
-    proof = []
+    global proof
 
     symbols = list(F.used_symbols())
     symbolsCount = len(symbols)
@@ -418,11 +460,13 @@ def Ad_Theorem(F):
             while None in proof:
                 proof.remove(None)
 
-            deduct = build_deduction(proof, Variable(X_n), F)
+            hypo = [Variable(k, _not = True if v == 0 else False) for k,v in values.items()]
+            deduct = build_deduction(hypo, Variable(X_n), F)
             if not deduct is None:
                 proof.extend(deduct)
 
-            deduct = build_deduction(proof, Variable(X_n, _not=True), F)
+            hypo = [Variable(k, _not = True if v == 0 else False) for k,v in values.items()]
+            deduct = build_deduction(hypo, Variable(X_n, _not=True), F)
 
             if not deduct is None:
                 proof.extend(deduct)
