@@ -284,6 +284,7 @@ def prepareString(s:str):
 
     return s
 
+'''
 if __name__ == '__main__':
 
 
@@ -322,3 +323,4 @@ if __name__ == '__main__':
     print(a, 'Calc:',a.calculate({'A':1}))
     print(na, 'Calc:',na.calculate({'A':1}))
     print(nna, 'Calc:',nna.calculate({'A':1}))
+'''

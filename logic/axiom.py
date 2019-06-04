@@ -301,9 +301,7 @@ def if_A3(F):
 
         a3 = A3(A,B)
 
-        print('l')
-        print(F)
-        print(a3)
+
         if a3 == F:
             return True
 

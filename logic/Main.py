@@ -37,20 +37,22 @@ proof = theorem_maker.Ad_Theorem(tree)
 
 file = open('Proof_'+str(tree)+'.txt','w',encoding='utf-8')
 
-# clean list from None
-while None in proof:
-    proof.remove(None)
-
-proof.sort(key=lambda x: x.id)
 
 file.write("Proof for: "+str(tree)+'\n\n')
 
 index = 0
 for p in proof:
+    if p is None:continue
 
     file.write(str(index)+'.\t'+str(p)+'\n'+p.msg+'\n\n')
 
     index+=1
 
-
 file.close()
+
+for p in proof[-10:]:
+    print(p)
+    if not p is None:
+        print(p.msg)
+
+    print()

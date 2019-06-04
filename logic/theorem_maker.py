@@ -2,6 +2,7 @@
 import axiom
 from axiom import MP
 from formula import Variable, Node, notFormula
+import formula
 
 proof = []  # global is not best solution, but as it is
 
@@ -31,86 +32,84 @@ def build_TL(F):
 
     return [F1, F2, F3, F4, F5]
 
-def build_deduction(hypoth, F, G):
+def build_deduction(hypoth, F, G, proof = []):
     """
         hypoth, F |- G => hypoth |- F->G
 
-        hypoth = {F1, ..., Fn}
+        proof = [F1, ..., Fn-1] + [G]
         F = Fn
     """
 
+    if len(proof) == 0 or proof[-1]!=G:
+        proof.append(G)
+
     res = []
 
-    if G==F:
-        res = build_TL(F)
-    elif axiom.if_Axiom(F) or F in hypoth:
+    P_index = -1
 
-        # A1 for F, G
-        F1 = axiom.A1(G,F)
-        # MP for F and F1
-        F2 = axiom.MP(G, F1)
+    for p in proof:
+        P_index+=1
 
-        res = [F1, F2]
+        if p==F:
+            res.extend(build_TL(F))
 
-    else:
-        s = -1
-        r = -1
+        elif axiom.if_Axiom(p) or p in hypoth:
 
-        for i in range(len(hypoth)):
-            for j in range(len(hypoth)):
-                # Fs = Fr -> F
-                f = Node(hypoth[i], F)
-                if hypoth[j] == f:
-                    r = i
-                    s = j
-                    break
+            # A1 for F, G
+            F1 = axiom.A1(p,F)
+            # MP for F and F1
+            F2 = axiom.MP(p, F1)
 
-            if s!=-1: break
+            res.extend([F1, F2])
 
-        if s == -1: return None # if happened, it's trouble
+        else:
+            # smth weird happens here
+            _str = p.msg
 
-        Fs = Node(hypoth[r], F)
+            if not _str.startswith("MP for"):
+                continue
 
-        # A2 for G, Fr, F
-        F1 = axiom.A2(G, hypoth[s], F)
+            _str = _str.replace("MP for", "")
 
-        # MP for F1, G->Fs
-        F2 = axiom.MP(F1, Node(G, Fs))
+            sFr, sFs = _str.split(',')
+            Fr = formula.buildFormula(formula.prepareString(sFr))
+            Fs = formula.buildFormula(formula.prepareString(sFs))
 
-        # MP for G->Fr, F2
-        F3 = axiom.MP(Node(G, hypoth[r]), F2)
+            # A2 for G, Fr, F
+            F1 = axiom.A2(F, Fr, p)
 
+            # MP for F1, G->Fs
+            F2 = axiom.MP(Node(F, Fs), F1)
 
-        return [F1, F2, F3]
+            # MP for G->Fr, F2
+            F3 = axiom.MP(Node(F, Fr), F2)
+
+            res.extend( [F1, F2, F3] )
 
     return res
 
 def syl_1(F, G):
+    # F = F->G; G = G->H
     F1 = F.left
 
     F4 = MP(F1, F)
     F5 = MP(F4, G)
 
     res = [F, G, F1, F4]
-    res.extend(build_deduction(res, F1, F5))
+    res.extend(build_deduction([F,G], F1, F5, res))
 
     return res
 
 def syl_2(F, G):
     # F->(G->H), G |- F->H
 
-
-
     F3 = F.left # A
     F4 = MP(F3, F) # B->C
     F5 = MP(G, F4) # C
 
-    f = build_deduction([F, F3, F4], F3, F5) # A->C
+    proof = build_deduction([F, G], F3, F5, [F, G, F3, F4, F5]) # A->C
 
-    res = [F3, F4, F5]
-    res.extend(f)
-
-    return res
+    return proof
 
 def build_T7(F,G):
     # (F->G)->((!F->G)->G)
@@ -144,11 +143,9 @@ def build_T7(F,G):
 
     F12 = MP(F10, F11)
 
-    proof = [F1, F2] + f3 + [F4] + f5 + [F6] + f7 + [F8, F9, F10] + f11 + [F12]
-
-    f13 = build_deduction(proof, F8, F12)
+    f13 = build_deduction([F1, F2, F9], F8, F12, [F8, F9, F10]+f11+[F12])
     F13 = f13[-1]
-    f14 = build_deduction(proof, F9, F13)
+    f14 = build_deduction([], F9, F13, f13)
     F14 = f14[-1]
 
     #...
@@ -157,9 +154,11 @@ def build_T7(F,G):
     f16 = syl_1(F15, F6)
     F16 = f16[-1]
 
-    f17 = build_deduction(proof, F1, F16)
+    proof = [F1, F2] + f14 + [F4] + f5
 
-    proof += f13 + f14 + f15 + f16 + f17
+    f17 = build_deduction([], F1, F16, proof)
+
+    proof = f17
 
     return proof
 
@@ -226,16 +225,12 @@ def build_T3(F, G):
     F8 = MP(F6, F7)
     F9 = MP(F4, F8)
 
-    hypoth = [F1, F2, F3, F4, F5, F6, F7, F8, F9]
+    proof = [F1, F2, F3, F4, F5, F6, F7, F8, F9]
 
-    ded1 = build_deduction(hypoth, F, G)
-    ded2 = build_deduction(hypoth+ded1, F1, ded1[-1])
-
-    proof = [F3, F4, F5, F6, F7]
-    proof.extend(ded1)
-    proof.extend(ded2)
-
-    proof.extend([F8, F9])
+    ded1 = build_deduction([F1], F, G, proof)
+    proof = ded1
+    ded2 = build_deduction([], F1, ded1[-1], proof)
+    proof = ded2
 
     return proof
 
@@ -254,19 +249,11 @@ def build_T4(F, G):
     F5 = axiom.A1(F, nG)
 
     f6 = syl_1(F5, F4)
-    F6 = f6[-1]
-    F7 = MP(F2, F6)
 
-    proof = [F1, F2, F3, F4, F5]
+    proof = [F3, F4, F5]
     proof.extend(f6)
 
-    ded1 = build_deduction(proof, F2, G)
-    ded2 = build_deduction(proof+ded1, F1, F6)
-
-
-    proof.append(F7)
-    proof.extend(ded1)
-    proof.extend(ded2)
+    proof = build_deduction([F1,F], F1, f6[-1], proof)
 
     return proof
 
@@ -282,36 +269,31 @@ def build_T5(F,G):
     nnG = notFormula(nG)
 
     F1 = Node(F,G)
-    F2 = nG
 
-    F3 = axiom.A3(nG, nF) # (!!F->!!G)->((!!F->!G)->!F)
-    F4 = axiom.A1(nG, nnF) # !G->(!!F->!G) => MP: !!F->!G
-    F45 = MP(nG, F4)
+    f2 = build_T2(G)
+    F2 = f2[-1]
 
-    f5 = build_T2(G)
+    F3 = axiom.A3(nG, nF)
+
+    f4 = syl_1(F1, F2) # f->!!g
+    F4 = f4[-1]
+
+    f5 = build_T1(F)
     F5 = f5[-1]
-    f6 = build_T1(F)
+
+    f6 = syl_1(F5, F4) # !!f->!!g
     F6 = f6[-1]
 
-    f7 = syl_1(F1, F5)
-    F7 = f7[-1]
+    F7 = MP(F6, F3) # (!!f->!g)->!f
 
-    f8 = syl_1(F6, F7)
-    F8 = f8[-1]
+    F8 = axiom.A1(nG, nnF)
 
-    F9 = MP(F8, F3)
-    F10 = MP(F45, F9)
+    f9 = syl_1(F8, F7)
+    F9 = f9[-1]
 
-    proof = [F1, F2, F3, F4, F45]
-    proof.extend(f5)
-    proof.extend(f6)
-    proof.extend(f7)
-    proof.extend(f8)
+    proof = f2 + [F3] + f4 + f5 + f6 + [F7, F8] + f9
 
-    proof.extend([F9, F10])
-    proof.extend(build_deduction(proof[:-2], F2, F10))
-    proof.extend(build_deduction(proof[:-2], F1, proof[-1]))
-
+    proof = build_deduction([F1, nG], F1, F9, proof)
 
     return proof
 
@@ -329,17 +311,14 @@ def build_T6(F, G):
     F1.msg = "hypoth t6"
     # we need (F->G)->G
     F2 = MP(F1, fg)
-    ded = build_deduction([F,fg], fg, G)
+    ded = build_deduction([F1, ng], fg, G, [F1, F2])
     F3 = ded[-1]
 
     F4 = MP(F3, T5)
-    F5 = MP(ng, F4)
 
-    proof = [fg, ng, F1]
-    proof.extend(t5)
-    proof.append(F2)
-    proof.extend(ded)
-    proof.extend([F4,F5])
+    proof = [F1, ng, F2] + ded + [F4]
+
+    proof = build_deduction([], F, F4, proof)
 
     return proof
 
@@ -453,23 +432,14 @@ def Ad_Theorem(F):
 
             C1 = Calmar_Theorem(F, values)
             C2 = Calmar_Theorem(F, values_not)
-            proof.extend(C1)
-            proof.extend(C2)
 
-            # clean
-            while None in proof:
-                proof.remove(None)
 
             hypo = [Variable(k, _not = True if v == 0 else False) for k,v in values.items()]
-            deduct = build_deduction(hypo, Variable(X_n), F)
-            if not deduct is None:
-                proof.extend(deduct)
+            deductC1 = build_deduction(hypo, Variable(X_n), F, C1)
 
             hypo = [Variable(k, _not = True if v == 0 else False) for k,v in values.items()]
-            deduct = build_deduction(hypo, Variable(X_n, _not=True), F)
+            deductC2 = build_deduction(hypo, Variable(X_n, _not=True), F, C2)
 
-            if not deduct is None:
-                proof.extend(deduct)
 
             if len(C1) == 0 or len(C2) == 0:
                 vector+=1
@@ -480,8 +450,12 @@ def Ad_Theorem(F):
             mp1 = MP(C1[-1], T7)
             mp2 = MP(C2[-1], mp1)
 
+            proof.extend(deductC1)
+            proof.extend(deductC2)
             proof.extend(t7)
             proof.extend([mp1, mp2])
+
+            curLen = len(proof) #for debug
 
             vector+=1
 
@@ -489,36 +463,20 @@ def Ad_Theorem(F):
         n+=1
 
 
-    # clean doubles
-
-    i1 = 0
-    while i1<len(proof):
-        i2 = i1+1
-        while i2<len(proof):
-            if proof[i2] == proof[i1]:
-                proof.pop(i2)
-            else:
-                i2+=1
-        i1+=1
-
     return proof
 
-if __name__ == '__main__': # some tests
+if __name__ == '__main__':
 
-    a = Variable('A')
-    nA = notFormula(a)
-    nna = notFormula(nA)
 
-    F = Node(a, nna)
 
-    proof = Ad_Theorem(F)
+    f = Variable('F')
+    g = Variable('G')
 
-    index = 0
-    for p in proof:
-        if p is None:
-            continue
-        print(str(index) + '.\t' + str(p) + '\n' + p.msg + '\n\n')
-        index+=1
+    t4 = build_T4(f,g)
+    T4 = t4[-1]
+    t5 = build_T5(f,g)
+    t6 = build_T6(f,g)
+    t7 = build_T7(f,g)
+    T7 = t7[-1]
 
-        if p == F:
-            break
+    print('no exception? it is small victory')
