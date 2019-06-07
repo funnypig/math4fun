@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3c05a15-a272-4594-9740-9a4181663b6b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/formula.py" beforeDir="false" afterPath="$PROJECT_DIR$/formula.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/theorem_maker.py" beforeDir="false" afterPath="$PROJECT_DIR$/theorem_maker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,7 +15,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/formula.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
+            <state relative-caret-position="1095">
               <caret line="75" column="16" selection-start-line="75" selection-start-column="16" selection-end-line="75" selection-end-column="16" />
               <folding>
                 <element signature="e#39#92#0" />
@@ -31,7 +29,7 @@
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="158">
-              <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+              <caret line="36" selection-start-line="36" selection-end-line="36" />
               <folding>
                 <element signature="e#495#516#0" expanded="true" />
               </folding>
@@ -42,7 +40,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/axiom.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
+            <state relative-caret-position="1335">
               <caret line="89" selection-start-line="89" selection-end-line="89" />
             </state>
           </provider>
@@ -51,21 +49,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/theorem_maker.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="154">
+            <state relative-caret-position="6780">
               <caret line="455" selection-start-line="455" selection-end-line="455" />
               <folding>
                 <element signature="e#1#13#0" expanded="true" />
-                <element signature="e#161#286#1" />
-                <element signature="e#623#722#1" />
-                <element signature="e#2002#2139#0" />
-                <element signature="e#2218#2544#0" />
-                <element signature="e#2567#2981#0" />
-                <element signature="e#3007#3509#0" />
-                <element signature="e#4021#4804#0" />
-                <element signature="e#4830#5274#0" />
-                <element signature="e#5311#5439#1" />
-                <element signature="e#5477#5562#0" />
-                <element signature="e#6823#6970#1" />
               </folding>
             </state>
           </provider>
@@ -122,6 +109,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -133,7 +121,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -284,21 +271,20 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1366" height="741" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Structure" order="0" sideWeight="0.5012225" side_tool="true" weight="0.24944155" />
       <window_info id="Favorites" order="1" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="2" sideWeight="0.4987775" visible="true" weight="0.24944155" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3289256" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.8428891" weight="0.30578512" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.8086374" visible="true" weight="0.52561986" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.8421444" weight="0.30578512" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.8086374" weight="0.52561986" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.19136262" side_tool="true" visible="true" weight="0.52561986" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.15785554" side_tool="true" visible="true" weight="0.30578512" />
       <window_info anchor="bottom" id="Python Console" order="10" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -397,27 +383,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Proof_(F) -&gt; (!(!(F))).txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-126126">
-          <caret line="492" column="32" selection-start-line="492" selection-start-column="16" selection-end-line="492" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Proof_(((A) -&gt; (B)) -&gt; (A)) -&gt; (A).txt">
-      <provider editor-type-id="text-editor" />
-      <provider selected="true" editor-type-id="LargeFileEditor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/axiom.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="89" selection-start-line="89" selection-end-line="89" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/Proof_(F) -&gt; (!(!(F))).txt" />
+    <entry file="file://$PROJECT_DIR$/Proof_(((A) -&gt; (B)) -&gt; (A)) -&gt; (A).txt" />
     <entry file="file://$PROJECT_DIR$/formula.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
+        <state relative-caret-position="1095">
           <caret line="75" column="16" selection-start-line="75" selection-start-column="16" selection-end-line="75" selection-end-column="16" />
           <folding>
             <element signature="e#39#92#0" />
@@ -426,23 +396,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/axiom.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1335">
+          <caret line="89" selection-start-line="89" selection-end-line="89" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/theorem_maker.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
+        <state relative-caret-position="6780">
           <caret line="455" selection-start-line="455" selection-end-line="455" />
           <folding>
             <element signature="e#1#13#0" expanded="true" />
-            <element signature="e#161#286#1" />
-            <element signature="e#623#722#1" />
-            <element signature="e#2002#2139#0" />
-            <element signature="e#2218#2544#0" />
-            <element signature="e#2567#2981#0" />
-            <element signature="e#3007#3509#0" />
-            <element signature="e#4021#4804#0" />
-            <element signature="e#4830#5274#0" />
-            <element signature="e#5311#5439#1" />
-            <element signature="e#5477#5562#0" />
-            <element signature="e#6823#6970#1" />
           </folding>
         </state>
       </provider>
@@ -450,7 +416,7 @@
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="158">
-          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+          <caret line="36" selection-start-line="36" selection-end-line="36" />
           <folding>
             <element signature="e#495#516#0" expanded="true" />
           </folding>
